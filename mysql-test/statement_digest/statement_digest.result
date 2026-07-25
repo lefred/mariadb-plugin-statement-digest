@@ -1,0 +1,30 @@
+INSTALL SONAME 'statement_digest';
+SELECT statement_digest_text('SELECT * FROM t WHERE a=1 AND b IN (2,3,4)');
+statement_digest_text('SELECT * FROM t WHERE a=1 AND b IN (2,3,4)')
+SELECT * FROM `t` WHERE `a` = ? AND `b` IN (...) 
+SELECT statement_digest('SELECT * FROM t WHERE a=1 AND b IN (2,3,4)') =
+statement_digest('SELECT * FROM t WHERE a=9 AND b IN (8,7)') AS same_digest;
+same_digest
+1
+SELECT statement_digest(NULL), statement_digest_text(NULL);
+statement_digest(NULL)	statement_digest_text(NULL)
+NULL	NULL
+SET @history_enabled = (SELECT ENABLED FROM performance_schema.setup_consumers
+WHERE NAME = 'events_statements_history');
+UPDATE performance_schema.setup_consumers SET ENABLED = 'YES'
+  WHERE NAME = 'events_statements_history';
+TRUNCATE performance_schema.events_statements_history;
+SELECT 1 + 2 AS digest_probe;
+digest_probe
+3
+SELECT statement_digest('SELECT 1 + 2 AS digest_probe') =
+(SELECT DIGEST FROM performance_schema.events_statements_history
+WHERE SQL_TEXT = 'SELECT 1 + 2 AS digest_probe'
+        ORDER BY EVENT_ID DESC LIMIT 1) AS matches_performance_schema;
+matches_performance_schema
+1
+UPDATE performance_schema.setup_consumers SET ENABLED = @history_enabled
+WHERE NAME = 'events_statements_history';
+SELECT statement_digest_text('SELECT FROM');
+ERROR 42000: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'FROM' at line 1
+UNINSTALL SONAME 'statement_digest';

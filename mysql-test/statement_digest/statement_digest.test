@@ -1,0 +1,27 @@
+--source include/have_perfschema.inc
+
+INSTALL SONAME 'statement_digest';
+
+SELECT statement_digest_text('SELECT * FROM t WHERE a=1 AND b IN (2,3,4)');
+SELECT statement_digest('SELECT * FROM t WHERE a=1 AND b IN (2,3,4)') =
+       statement_digest('SELECT * FROM t WHERE a=9 AND b IN (8,7)') AS same_digest;
+SELECT statement_digest(NULL), statement_digest_text(NULL);
+
+# Compare against the digest captured by the statement event consumer.
+SET @history_enabled = (SELECT ENABLED FROM performance_schema.setup_consumers
+                        WHERE NAME = 'events_statements_history');
+UPDATE performance_schema.setup_consumers SET ENABLED = 'YES'
+  WHERE NAME = 'events_statements_history';
+TRUNCATE performance_schema.events_statements_history;
+SELECT 1 + 2 AS digest_probe;
+SELECT statement_digest('SELECT 1 + 2 AS digest_probe') =
+       (SELECT DIGEST FROM performance_schema.events_statements_history
+        WHERE SQL_TEXT = 'SELECT 1 + 2 AS digest_probe'
+        ORDER BY EVENT_ID DESC LIMIT 1) AS matches_performance_schema;
+UPDATE performance_schema.setup_consumers SET ENABLED = @history_enabled
+  WHERE NAME = 'events_statements_history';
+
+--error ER_PARSE_ERROR
+SELECT statement_digest_text('SELECT FROM');
+
+UNINSTALL SONAME 'statement_digest';
