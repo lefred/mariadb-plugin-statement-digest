@@ -324,30 +324,30 @@ maria_declare_plugin(statement_digest)
   MariaDB_FUNCTION_PLUGIN,
   Item_func_statement_digest::plugin_descriptor(),
   "statement_digest",
-  "lefred",
+  PLUGIN_AUTHOR,
   "Compute a Performance Schema compatible statement digest",
-  PLUGIN_LICENSE_GPL,
+  PLUGIN_LICENSE,
   nullptr,
   nullptr,
-  0x0100,
+  PLUGIN_HEX_VERSION,
   nullptr,
   nullptr,
-  "1.0",
-  MariaDB_PLUGIN_MATURITY_EXPERIMENTAL
+  PLUGIN_VERSION,
+  PLUGIN_MATURITY
 },
 {
   MariaDB_FUNCTION_PLUGIN,
   Item_func_statement_digest_text::plugin_descriptor(),
   "statement_digest_text",
-  "lefred",
+  PLUGIN_AUTHOR,
   "Compute Performance Schema compatible normalized statement text",
-  PLUGIN_LICENSE_GPL,
+  PLUGIN_LICENSE,
   nullptr,
   nullptr,
-  0x0100,
+  PLUGIN_HEX_VERSION,
   nullptr,
   nullptr,
-  "0.2.0",
-  MariaDB_PLUGIN_MATURITY_BETA
+  PLUGIN_VERSION, 
+  PLUGIN_MATURITY
 }
 maria_declare_plugin_end;
